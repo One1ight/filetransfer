@@ -17,15 +17,17 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"transfer/handler"
 	"transfer/qrcode"
-	"transfer/server"
 	"transfer/utils"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/net/context"
 	"rsc.io/qr"
 )
 
@@ -40,20 +42,23 @@ var downloadCmd = &cobra.Command{
 		port := ":8888"
 		filename := args[0]
 		qrcode.Generate("http://"+utils.GetLocalIP()+port, qr.M, os.Stdout)
-		ch := make(chan os.Signal)
-		signal.Notify(ch, os.Interrupt)
-		sc, err := server.ListenAndServeWithClose(":8888", handler.DownloadHandler(filename))
-		if err != nil {
-			return err
-		}
-		select {
-		case <-ch:
-			// Close HTTP Server
-			err := sc.Close()
+		server := &http.Server{Addr: port, Handler: handler.DownloadHandler(filename)}
+		go func() {
+			err := server.ListenAndServe()
 			if err != nil {
-				log.Fatalln("Server Close Error - ", err)
+				log.Fatal(err)
 			}
-			log.Println("Server Closed")
+		}()
+		ctx := context.Background()
+		stop := make(chan os.Signal)
+		signal.Notify(stop, os.Interrupt)
+		select {
+		case <-stop:
+			err := server.Shutdown(ctx)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("\nserver closed\n")
 		}
 		return nil
 	},

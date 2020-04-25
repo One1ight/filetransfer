@@ -16,13 +16,14 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"html/template"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"transfer/handler"
 	"transfer/qrcode"
-	"transfer/server"
 	"transfer/utils"
 
 	"github.com/spf13/cobra"
@@ -39,25 +40,21 @@ var uploadCmd = &cobra.Command{
 		port := ":8888"
 		// 阻塞&传递filename
 		ch := make(chan string)
-		srvCLoser, err := server.ListenAndServeWithClose(port, handler.UploadHandler(ch, tmpl))
-		if err != nil {
-			log.Fatalln("ListenAndServeWithClose Error - ", err)
-		}
-		// 将地址
-		qrcode.Generate("http://"+utils.GetLocalIP()+port, qr.M, os.Stdout)
-		// post finished?
-		select {
-		case filename := <-ch:
-			// Close HTTP Server
-			err := srvCLoser.Close()
-			if err != nil {
-				log.Fatalln("Server Close Error - ", err)
+		server := &http.Server{Addr: port, Handler: handler.UploadHandler(ch, tmpl)}
+		go func() {
+			if err := server.ListenAndServe(); err != nil {
+				log.Fatal(err)
 			}
-			log.Println("Server Closed")
-			cmd := exec.Command("open", filename)
-			cmd.Run()
+		}()
+		qrcode.Generate("http://"+utils.GetLocalIP()+port, qr.M, os.Stdout)
+		ctx := context.Background()
+		filename := <-ch
+		if err := server.Shutdown(ctx); err != nil {
+			log.Println("err:", err)
 		}
-
+		log.Println("server closed")
+		ccc := exec.Command("open", filename)
+		ccc.Run()
 	},
 }
 
