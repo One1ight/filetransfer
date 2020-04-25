@@ -41,6 +41,7 @@ var downloadCmd = &cobra.Command{
 		}
 		port := ":8888"
 		filename := args[0]
+		// TODO 使用随机端口代替8888并打印地址
 		qrcode.Generate("http://"+utils.GetLocalIP()+port, qr.M, os.Stdout)
 		server := &http.Server{Addr: port, Handler: handler.DownloadHandler(filename)}
 		go func() {

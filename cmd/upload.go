@@ -40,6 +40,7 @@ var uploadCmd = &cobra.Command{
 		port := ":8888"
 		// 阻塞&传递filename
 		ch := make(chan string)
+		// TODO 使用随机端口代替8888并打印地址
 		server := &http.Server{Addr: port, Handler: handler.UploadHandler(ch, tmpl)}
 		go func() {
 			if err := server.ListenAndServe(); err != nil {
