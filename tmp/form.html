@@ -7,7 +7,7 @@
 <style>
 .input-file-container {
   position: relative;
-  width: 225px;
+  width: 500px;
 } 
 .js .input-file-trigger,
 .js .submit-input-trigger{
@@ -23,7 +23,7 @@
 .js .input-file {
   position: absolute;
   top: 0; left: 0;
-  width: 225px;
+  width: 500px;
   opacity: 0;
   padding: 14px 0;
   cursor: pointer;
@@ -72,7 +72,7 @@ h1, h2 {
 }
 
 form {
-  width: 225px;
+  width: 500px;
   margin: 0 auto;
   text-align:center;
 }
@@ -81,9 +81,9 @@ form {
   <div class="container">
     <h1>文件传输助手</h1>
     
-    <form action="/upload" method="POST">
+    <form action="/upload" method="POST" enctype="multipart/form-data">
       <div class="input-file-container">  
-        <input class="input-file" id="my-file" type="file">
+        <input class="input-file" id="my-file" type="file" name="file">
         <label tabindex="0" for="my-file" class="input-file-trigger">选择文件</label>
       </div>
       <p class="file-return">未选择文件</p>
@@ -96,7 +96,7 @@ form {
   </div>
 </body>
 <script>
-  //参考: https://codepen.io/GeoffreyCrofte/pen/HbwcG
+  // https://codepen.io/GeoffreyCrofte/pen/HbwcG
 document.querySelector("html").classList.add('js');
 
 var fileInput  = document.querySelector( ".input-file" ),  
