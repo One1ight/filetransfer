@@ -9,8 +9,22 @@ import (
 	"strconv"
 )
 
+var tmpl *template.Template
+
+// use go-bindata template
+func init() {
+	b, err := Asset("web/template/form.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	tmpl, err = template.New("").Parse(string(b))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 // UploadHandler 上传handler
-func UploadHandler(ch chan<- string, tmpl *template.Template) http.Handler {
+func UploadHandler(ch chan<- string) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == "POST" {
@@ -30,7 +44,7 @@ func UploadHandler(ch chan<- string, tmpl *template.Template) http.Handler {
 				}
 				ch <- filename
 			} else {
-				tmpl.Execute(w, nil)
+				tmpl.ExecuteTemplate(w, "base", nil)
 			}
 		})
 }

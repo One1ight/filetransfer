@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"context"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -30,8 +29,6 @@ import (
 	"rsc.io/qr"
 )
 
-var tmpl *template.Template
-
 // uploadCmd represents the upload command
 var uploadCmd = &cobra.Command{
 	Use:   "upload",
@@ -41,7 +38,7 @@ var uploadCmd = &cobra.Command{
 		// 阻塞&传递filename
 		ch := make(chan string)
 		// TODO 使用随机端口代替8888并打印地址
-		server := &http.Server{Addr: port, Handler: handler.UploadHandler(ch, tmpl)}
+		server := &http.Server{Addr: port, Handler: handler.UploadHandler(ch)}
 		go func() {
 			if err := server.ListenAndServe(); err != nil {
 				log.Fatal(err)
@@ -60,7 +57,6 @@ var uploadCmd = &cobra.Command{
 }
 
 func init() {
-	tmpl = template.Must(template.ParseFiles("tmp/form.html"))
 	rootCmd.AddCommand(uploadCmd)
 
 	// Here you will define your flags and configuration settings.
