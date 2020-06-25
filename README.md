@@ -6,7 +6,7 @@ Usage:
 
 1. `git clone git@github.com:One1ight/filetransfer.git`
 
-2. `go build`
+2. `cd filetransfer && go build`
 
 3. `./transfer [flag]`
 
